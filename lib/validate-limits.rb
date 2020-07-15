@@ -27,20 +27,24 @@ module ValidateLimits
           next if attributes_with_limit_validation.include?(column.name)
 
           case column.type
-            when :string, :text
-              self.attributes_with_limit_validation += [column.name]
-              validates_length_of column.name, maximum: column.limit
+          when :string
+            self.attributes_with_limit_validation += [column.name]
+            validates_length_of column.name, maximum: (column.limit || 255)
 
-            when :integer
-              next if column.name == primary_key
+          when :text
+            self.attributes_with_limit_validation += [column.name]
+            validates_length_of column.name, maximum: (column.limit || 4_294_967_296)
 
-              self.attributes_with_limit_validation += [column.name]
-              bits = column.limit * 8
-              min  = -(2**(bits-1))
-              max  = +(2**(bits-1))-1
-              validates_numericality_of column.name, greater_than_or_equal_to: min,
-                                                     less_than_or_equal_to:    max,
-                                                     if:                       :"#{column.name}?"
+          when :integer
+            next if column.name == primary_key
+
+            self.attributes_with_limit_validation += [column.name]
+            bits = (column.limit || 4) * 8
+            min  = -(2**(bits-1))
+            max  = +(2**(bits-1))-1
+            validates_numericality_of column.name, greater_than_or_equal_to: min,
+                                      less_than_or_equal_to:    max,
+                                      if:                       :"#{column.name}?"
           end
         end
       end
