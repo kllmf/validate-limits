@@ -23,7 +23,10 @@ module ValidateLimits
         return if abstract_class?
         return remove_instance_variable(:@table_name) unless table_name.in?(ActiveRecord::Base.connection.tables)
 
+        skip_enums = defined_enums.keys
+
         columns_hash.values.each do |column|
+          next if skip_enums.include?(column.name)
           next if attributes_with_limit_validation.include?(column.name)
 
           case column.type
