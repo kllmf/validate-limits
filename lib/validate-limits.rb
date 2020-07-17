@@ -21,7 +21,6 @@ module ValidateLimits
       def validate_limits
         return if defined?(ActiveRecord::SchemaMigration) && self <= ActiveRecord::SchemaMigration
         return if abstract_class?
-        return remove_instance_variable(:@table_name) unless table_name.in?(ActiveRecord::Base.connection.tables)
 
         columns_hash.values.each do |column|
           next if attributes_with_limit_validation.include?(column.name)
